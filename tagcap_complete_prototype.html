@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tag Cap — Complete Prototype v1.0</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #111; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; gap: 40px; min-height: 100vh; color: #fff; }
+.main-header { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.main-title { font-size: 24px; font-weight: 600; color: #fff; letter-spacing: -0.5px; }
+.main-sub { font-size: 13px; color: rgba(255,255,255,0.3); }
+.section { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
+.section-title { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.25); letter-spacing: 2px; text-transform: uppercase; }
+.screens-row { display: flex; gap: 16px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+.phone-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.phone-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.3); text-align: center; }
+.phone { width: 160px; border-radius: 32px; position: relative; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.07); background: #0d0d0d; display: flex; flex-direction: column; }
+.notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 50px; height: 7px; background: rgba(255,255,255,0.06); border-radius: 5px; z-index: 10; }
+
+/* 아이콘 */
+.icon-row { display: flex; gap: 20px; align-items: flex-end; justify-content: center; flex-wrap: wrap; }
+.icon-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.icon-label { font-size: 10px; color: rgba(255,255,255,0.25); }
+.app-icon { border-radius: 22.5%; background: #0d0d0d; border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 3px; position: relative; overflow: hidden; }
+.app-icon::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.04), transparent 60%); }
+.app-icon svg { position: relative; z-index: 2; }
+.tc-text { font-weight: 600; color: #e2e2e2; letter-spacing: 1.5px; position: relative; z-index: 2; }
+
+/* 공통 폰 요소 */
+.app-name { font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.2); letter-spacing: 2px; text-transform: uppercase; }
+.tagline { font-size: 16px; font-weight: 500; color: #fff; letter-spacing: -0.3px; text-align: center; margin-top: 2px; }
+.tagline span { color: #d4d4d4; }
+.m-sub-text { font-size: 7px; color: rgba(255,255,255,0.18); margin-top: 2px; }
+.badge-row { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
+.badge { font-size: 6px; font-weight: 500; color: #777; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 2px 5px; }
+
+/* 스플래시 */
+.splash { height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 32px 16px; }
+.splash-name { font-size: 14px; font-weight: 500; color: #fff; letter-spacing: 2px; animation: fadeUp 0.8s ease-out 0.3s both; }
+.splash-sub  { font-size: 8px; color: rgba(255,255,255,0.22); animation: fadeUp 0.8s ease-out 0.6s both; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+/* 온보딩 */
+.ob-phone { height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 28px 14px 20px; background: #0d0d0d; }
+.ob-illust { flex: 1; display: flex; align-items: center; justify-content: center; }
+.ob-text { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.ob-title { font-size: 13px; font-weight: 500; color: #fff; text-align: center; letter-spacing: -0.2px; line-height: 1.3; }
+.ob-sub   { font-size: 9px; color: rgba(255,255,255,0.3); text-align: center; line-height: 1.5; }
+.ob-bottom { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.dots { display: flex; gap: 4px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+.dot.active { width: 14px; border-radius: 3px; background: #e2e2e2; }
+.ob-btn { width: 100%; background: #e2e2e2; color: #111; border: none; border-radius: 10px; padding: 9px; font-size: 10px; font-weight: 500; cursor: pointer; text-align: center; }
+.price-tag-mini { width: 72px; height: 42px; background: #1c1c1f; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; position: relative; }
+.price-tag-mini::after { content: ''; position: absolute; right: -6px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: #0d0d0d; }
+.pt-label { font-size: 6px; color: rgba(255,255,255,0.25); letter-spacing: 0.8px; text-transform: uppercase; }
+.pt-price { font-size: 14px; font-weight: 500; color: #fff; letter-spacing: -0.3px; }
+.qmarks { display: flex; gap: 5px; margin-top: 4px; }
+.qm { font-size: 14px; font-weight: 500; animation: qPulse 1.5s ease-in-out infinite; }
+.qm.q1 { color: rgba(255,255,255,0.6); }
+.qm.q2 { color: rgba(255,255,255,0.3); font-size: 11px; animation-delay: 0.3s; }
+.qm.q3 { color: rgba(255,255,255,0.12); font-size: 8px; animation-delay: 0.6s; }
+@keyframes qPulse { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-3px); } }
+.ctag { font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.28); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 2px 6px; flex-shrink: 0; }
+.ctag.active { color: #e2e2e2; background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.16); }
+
+/* 메인 */
+.main-phone { height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 28px 14px 20px; }
+.coin-area { width: 60px; height: 22px; position: relative; overflow: visible; }
+.coin { position: absolute; border-radius: 50%; background: #e5e5e5; border: 1px solid #aaa; display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: 500; color: #444; opacity: 0; }
+.coin.animate { animation: coinFly 0.85s ease-out forwards; }
+@keyframes coinFly { 0%{opacity:1;transform:translateY(0) scale(1);} 60%{opacity:1;} 100%{opacity:0;transform:translateY(-40px) scale(0.5);} }
+.scan-btn { width: 82px; height: 82px; border-radius: 50%; background: #1e1e1e; border: 1.5px solid rgba(255,255,255,0.12); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; transition: transform 0.12s; box-shadow: 0 0 0 6px rgba(255,255,255,0.02); }
+.scan-btn:active { transform: scale(0.93); }
+.scan-btn.burst { animation: btnPulse 0.45s ease-out; }
+@keyframes btnPulse { 0%{box-shadow:0 0 0 6px rgba(255,255,255,0.02);} 50%{box-shadow:0 0 0 16px rgba(255,255,255,0.06);} 100%{box-shadow:0 0 0 6px rgba(255,255,255,0.02);} }
+.scan-lbl { font-size: 7px; font-weight: 500; color: #ccc; letter-spacing: 1px; }
+
+/* 스캔 */
+.scan-phone { height: 320px; background: #050505; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 26px 0 20px; }
+.s-top { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 14px; }
+.s-title { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.8); }
+.s-icon-btn { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; font-size: 9px; color: rgba(255,255,255,0.4); }
+.icon-zone { position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
+.ring { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); animation: ringExpand 2.4s ease-out infinite; }
+.ring.r1 { width: 54px; height: 54px; animation-delay: 0s; }
+.ring.r2 { width: 74px; height: 74px; animation-delay: 0.6s; }
+.ring.r3 { width: 94px; height: 94px; animation-delay: 1.2s; }
+@keyframes ringExpand { 0%{opacity:0.5;transform:scale(0.75);} 100%{opacity:0;transform:scale(1.1);} }
+.scan-frame { width: 90px; height: 90px; position: relative; display: flex; align-items: center; justify-content: center; z-index: 2; }
+.corner { position: absolute; width: 11px; height: 11px; }
+.corner.tl { top:0;left:0;border-top:2px solid #e2e2e2;border-left:2px solid #e2e2e2;border-radius:2px 0 0 0; }
+.corner.tr { top:0;right:0;border-top:2px solid #e2e2e2;border-right:2px solid #e2e2e2;border-radius:0 2px 0 0; }
+.corner.bl { bottom:0;left:0;border-bottom:2px solid #e2e2e2;border-left:2px solid #e2e2e2;border-radius:0 0 0 2px; }
+.corner.br { bottom:0;right:0;border-bottom:2px solid #e2e2e2;border-right:2px solid #e2e2e2;border-radius:0 0 2px 0; }
+.scan-line { position: absolute; left:4px;right:4px;height:1px;background:linear-gradient(90deg,transparent,#e2e2e2,transparent);animation:scanMove 1.8s ease-in-out infinite; }
+@keyframes scanMove { 0%{top:6px;opacity:0;} 10%{opacity:1;} 90%{opacity:1;} 100%{top:80px;opacity:0;} }
+.s-hint { font-size: 9px; color: rgba(255,255,255,0.28); text-align: center; line-height: 1.5; }
+.s-hint span { color: #e2e2e2; font-weight: 500; }
+.s-bottom { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.s-side { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.07); }
+.shutter { width: 42px; height: 42px; border-radius: 50%; background: #2a2a2a; border: 2px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; }
+.shutter-inner { width: 30px; height: 30px; border-radius: 50%; background: #e2e2e2; opacity: 0.85; }
+
+/* 로딩 */
+.loading-phone { height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 28px 14px 22px; }
+.l-appname { font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.2); letter-spacing: 2px; text-transform: uppercase; }
+.l-icon-zone { position: relative; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; }
+.l-icon-wrap { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; z-index: 2; position: relative; animation: iconPulse 2s ease-in-out infinite; }
+@keyframes iconPulse { 0%{box-shadow:0 0 0 0 rgba(255,255,255,0.06);} 50%{box-shadow:0 0 0 10px rgba(255,255,255,0.01);} 100%{box-shadow:0 0 0 0 rgba(255,255,255,0.06);} }
+.l-status { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.l-main { font-size: 12px; font-weight: 500; color: #fff; text-align: center; }
+.l-sub  { font-size: 9px; color: rgba(255,255,255,0.25); text-align: center; }
+.country-wrap { overflow: hidden; width: 132px; -webkit-mask-image: linear-gradient(90deg,transparent,black 15%,black 85%,transparent); mask-image: linear-gradient(90deg,transparent,black 15%,black 85%,transparent); }
+.country-row { display: flex; gap: 5px; animation: slideLeft 5s linear infinite; white-space: nowrap; }
+@keyframes slideLeft { 0%{transform:translateX(0);} 100%{transform:translateX(-50%);} }
+.l-bottom { width: 100%; display: flex; flex-direction: column; gap: 5px; }
+.l-prog-label { display: flex; justify-content: space-between; }
+.l-prog-label span { font-size: 8px; color: rgba(255,255,255,0.22); }
+.l-prog-label .pct { color: rgba(255,255,255,0.5); font-weight: 500; }
+.l-prog-track { width: 100%; height: 2px; background: rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
+.l-prog-bar { height: 100%; background: #e2e2e2; border-radius: 10px; width: 0%; animation: progressFill 3s ease-out forwards; }
+@keyframes progressFill { 0%{width:0%;} 30%{width:35%;} 60%{width:68%;} 85%{width:89%;} 100%{width:97%;} }
+
+/* 결과 */
+.result-phone { background: #111114; border: 1.5px solid rgba(255,255,255,0.06); }
+.r-header { background: #0d0d0d; padding: 26px 14px 14px; }
+.r-back { font-size: 8px; color: rgba(255,255,255,0.25); margin-bottom: 5px; }
+.r-brand { font-size: 7px; font-weight: 500; color: rgba(255,255,255,0.28); letter-spacing: 1.8px; text-transform: uppercase; margin-bottom: 2px; }
+.r-product { font-size: 13px; font-weight: 500; color: #fff; line-height: 1.3; }
+.r-body { padding: 8px 10px 16px; display: flex; flex-direction: column; gap: 6px; }
+.r-save { background: #1c1c1f; border-radius: 13px; border: 1px solid rgba(255,255,255,0.05); padding: 10px 11px; }
+.r-save-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.r-eye { font-size: 7px; font-weight: 500; color: rgba(255,255,255,0.28); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 2px; }
+.r-num { font-size: 20px; font-weight: 500; color: #fff; letter-spacing: -0.8px; line-height: 1; }
+.r-ssub { font-size: 7px; color: rgba(255,255,255,0.2); margin-top: 2px; }
+.r-pill { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.09); border-radius: 16px; padding: 5px 7px; display: flex; flex-direction: column; align-items: center; }
+.r-pill-n { font-size: 12px; font-weight: 500; color: #e2e2e2; line-height: 1; }
+.r-pill-l { font-size: 7px; color: rgba(255,255,255,0.28); }
+.r-bar-row { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+.r-bl { font-size: 7px; color: rgba(255,255,255,0.25); width: 36px; flex-shrink: 0; }
+.r-bt { flex: 1; height: 3px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
+.r-bf { height: 100%; border-radius: 10px; }
+.r-bf.cur  { background: rgba(255,255,255,0.15); width: 100%; }
+.r-bf.best { background: #e2e2e2; width: 65%; }
+.r-bv { font-size: 7px; font-weight: 500; color: rgba(255,255,255,0.3); width: 40px; text-align: right; flex-shrink: 0; }
+.r-bv.top { color: #e2e2e2; }
+.r-list { background: #1c1c1f; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
+.r-lh { padding: 8px 11px 4px; font-size: 7px; font-weight: 500; color: rgba(255,255,255,0.2); letter-spacing: 1.5px; text-transform: uppercase; }
+.r-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 11px; border-top: 0.5px solid rgba(255,255,255,0.04); }
+.r-rl { display: flex; align-items: center; gap: 6px; }
+.r-rank { width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 500; flex-shrink: 0; }
+.r-rank.k1 { background: rgba(255,255,255,0.12); color: #fff; }
+.r-rank.k2 { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); }
+.r-rank.k3 { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.3); }
+.r-sn { font-size: 9px; font-weight: 500; color: #e2e2e2; }
+.r-sm { font-size: 7px; color: rgba(255,255,255,0.2); }
+.r-rr { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.r-price { font-size: 9px; font-weight: 500; color: rgba(255,255,255,0.4); }
+.r-price.top { color: #fff; }
+.r-buy { border-radius: 12px; padding: 2px 6px; font-size: 7px; font-weight: 500; cursor: pointer; border: none; }
+.r-buy.filled { background: #e2e2e2; color: #111; }
+.r-buy.ghost  { background: transparent; color: rgba(255,255,255,0.25); border: 1px solid rgba(255,255,255,0.09); }
+.r-share { display: flex; gap: 5px; }
+.r-sbtn { flex: 1; background: #1c1c1f; border: 1px solid rgba(255,255,255,0.05); border-radius: 9px; padding: 6px; font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.28); text-align: center; cursor: pointer; }
+.r-sbtn.primary { background: #e2e2e2; color: #111; border: none; }
+
+/* 절약결산 */
+.wrapped-phone { background: #0d0d0d; }
+.w-hero { background: linear-gradient(160deg,#1c1c1f 0%,#0d0d0d 100%); padding: 28px 14px 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.w-label { font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.28); letter-spacing: 1.5px; text-transform: uppercase; }
+.w-amount { font-size: 30px; font-weight: 500; color: #fff; letter-spacing: -1.5px; line-height: 1; animation: fadeUp 1s ease-out 0.3s both; }
+.w-sub { font-size: 9px; color: rgba(255,255,255,0.28); }
+.w-conscience { font-size: 7px; color: rgba(255,255,255,0.1); }
+.w-pill { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 5px 10px; margin-top: 3px; animation: fadeUp 1s ease-out 0.6s both; }
+.w-pill-main { font-size: 10px; font-weight: 500; color: #fff; text-align: center; }
+.w-pill-sub  { font-size: 8px; color: rgba(255,255,255,0.28); text-align: center; }
+.w-body { padding: 7px 10px 16px; display: flex; flex-direction: column; gap: 5px; background: #111114; }
+.w-mcard { background: #1c1c1f; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); padding: 9px 11px; display: flex; align-items: center; justify-content: space-between; }
+.w-ml { display: flex; flex-direction: column; gap: 1px; }
+.w-me { font-size: 7px; font-weight: 500; color: rgba(255,255,255,0.28); letter-spacing: 0.8px; text-transform: uppercase; }
+.w-mn { font-size: 16px; font-weight: 500; color: #fff; letter-spacing: -0.5px; line-height: 1; }
+.w-ms { font-size: 7px; color: rgba(255,255,255,0.2); margin-top: 1px; }
+.w-badge { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 3px 7px; font-size: 9px; font-weight: 500; color: #e2e2e2; }
+.w-list { background: #1c1c1f; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
+.w-lh { padding: 7px 11px 4px; font-size: 7px; font-weight: 500; color: rgba(255,255,255,0.2); letter-spacing: 1.5px; text-transform: uppercase; }
+.w-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 11px; border-top: 0.5px solid rgba(255,255,255,0.04); }
+.w-rl { display: flex; align-items: center; gap: 6px; }
+.w-rk { width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 500; }
+.w-rk.k1 { background: rgba(255,255,255,0.12); color: #fff; }
+.w-rk.k2 { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); }
+.w-rk.k3 { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.3); }
+.w-bn { font-size: 9px; font-weight: 500; color: #e2e2e2; }
+.w-bc { font-size: 7px; color: rgba(255,255,255,0.12); }
+.w-ba { font-size: 9px; font-weight: 500; color: rgba(255,255,255,0.4); }
+.w-share { background: #fff; color: #111; border: none; border-radius: 10px; padding: 8px; font-size: 9px; font-weight: 500; cursor: pointer; text-align: center; }
+
+/* 히스토리 */
+.hist-phone { background: #111114; }
+.h-header { background: #0d0d0d; padding: 26px 13px 11px; display: flex; flex-direction: column; gap: 7px; }
+.h-row { display: flex; align-items: center; justify-content: space-between; }
+.h-title { font-size: 14px; font-weight: 500; color: #fff; letter-spacing: -0.3px; }
+.h-total { font-size: 9px; color: rgba(255,255,255,0.25); }
+.h-search { background: #1c1c1f; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 6px 10px; font-size: 9px; color: rgba(255,255,255,0.18); }
+.h-body { padding: 7px 10px 16px; display: flex; flex-direction: column; gap: 4px; }
+.h-date { font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.2); letter-spacing: 1px; text-transform: uppercase; padding: 4px 2px 2px; }
+.h-item { background: #1c1c1f; border-radius: 11px; border: 1px solid rgba(255,255,255,0.05); padding: 8px 9px; display: flex; align-items: center; gap: 7px; }
+.h-icon { width: 28px; height: 28px; border-radius: 7px; background: #2a2a2a; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.4); flex-shrink: 0; }
+.h-info { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.h-brand { font-size: 8px; color: rgba(255,255,255,0.3); }
+.h-name  { font-size: 10px; font-weight: 500; color: #e2e2e2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.h-meta  { font-size: 7px; color: rgba(255,255,255,0.16); }
+.h-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.h-saved { font-size: 10px; font-weight: 500; color: #e2e2e2; white-space: nowrap; }
+.h-saved.none { font-size: 8px; color: rgba(255,255,255,0.18); }
+.h-time  { font-size: 7px; color: rgba(255,255,255,0.14); }
+.h-summary { background: #1c1c1f; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 3px; }
+.h-sitem { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.h-sval { font-size: 11px; font-weight: 500; color: #fff; }
+.h-slbl { font-size: 7px; color: rgba(255,255,255,0.2); }
+.h-sdiv { width: 1px; height: 16px; background: rgba(255,255,255,0.06); }
+
+/* 마이페이지 */
+.my-phone { background: #111114; }
+.my-header { background: #0d0d0d; padding: 26px 13px 12px; display: flex; flex-direction: column; gap: 9px; }
+.my-title { font-size: 14px; font-weight: 500; color: #fff; letter-spacing: -0.3px; }
+.my-profile { display: flex; align-items: center; gap: 8px; background: #1c1c1f; border-radius: 11px; border: 1px solid rgba(255,255,255,0.05); padding: 8px 10px; }
+.my-avatar { width: 32px; height: 32px; border-radius: 50%; background: #2a2a2a; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #e2e2e2; flex-shrink: 0; }
+.my-name { font-size: 11px; font-weight: 500; color: #fff; }
+.my-curr { font-size: 8px; color: rgba(255,255,255,0.28); }
+.my-edit { font-size: 8px; color: rgba(255,255,255,0.2); margin-left: auto; }
+.my-body { padding: 7px 10px 18px; display: flex; flex-direction: column; gap: 5px; }
+.my-banner { background: #1c1c1f; border-radius: 11px; border: 1px solid rgba(255,255,255,0.07); padding: 9px 11px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.my-btitle { font-size: 11px; font-weight: 500; color: #fff; }
+.my-bsub   { font-size: 8px; color: rgba(255,255,255,0.25); margin-top: 1px; }
+.my-bey    { font-size: 7px; font-weight: 500; color: rgba(255,255,255,0.25); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 2px; }
+.my-barrow { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.3); flex-shrink: 0; }
+.my-sec { font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.2); letter-spacing: 1.2px; text-transform: uppercase; padding: 2px 2px 1px; }
+.my-list { background: #1c1c1f; border-radius: 11px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden; }
+.my-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 11px; border-bottom: 0.5px solid rgba(255,255,255,0.04); cursor: pointer; }
+.my-row:last-child { border-bottom: none; }
+.my-rl { display: flex; align-items: center; gap: 7px; }
+.my-ricon { width: 20px; height: 20px; border-radius: 5px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.my-rtitle { font-size: 10px; font-weight: 500; color: #e2e2e2; }
+.my-rval  { font-size: 8px; color: rgba(255,255,255,0.28); }
+.my-rchev { font-size: 9px; color: rgba(255,255,255,0.16); }
+.toggle { width: 24px; height: 14px; border-radius: 7px; position: relative; cursor: pointer; flex-shrink: 0; }
+.toggle.on { background: #e2e2e2; }
+.toggle.off { background: rgba(255,255,255,0.1); }
+.toggle::after { content: ''; position: absolute; top: 2px; width: 10px; height: 10px; border-radius: 50%; }
+.toggle.on::after  { right: 2px; background: #111; }
+.toggle.off::after { left: 2px;  background: rgba(255,255,255,0.3); }
+.my-appver { font-size: 9px; color: rgba(255,255,255,0.1); text-align: center; padding: 4px 0; }
+
+/* 구분선 */
+.divider { width: 100%; height: 1px; background: rgba(255,255,255,0.06); }
+</style>
+</head>
+<body>
+
+<div class="main-header">
+  <div class="main-title">Tag Cap</div>
+  <div class="main-sub">Complete Prototype v1.0 — 오늘 하루 완성</div>
+</div>
+
+<!-- 앱 아이콘 -->
+<div class="section">
+  <div class="section-title">앱 아이콘</div>
+  <div class="icon-row">
+    <div class="icon-col">
+      <div class="app-icon" style="width:100px;height:100px;border-radius:22px;">
+        <svg width="46" height="46" viewBox="0 0 52 52" fill="none">
+          <rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="8" y="8" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+          <rect x="34" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="38" y="8" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+          <rect x="4" y="34" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="8" y="38" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+          <rect x="34" y="34" width="6" height="2" rx="1" fill="rgba(226,226,226,0.5)"/>
+          <rect x="34" y="38" width="4" height="2" rx="1" fill="rgba(226,226,226,0.5)"/>
+          <rect x="40" y="38" width="8" height="2" rx="1" fill="rgba(226,226,226,0.5)"/>
+          <rect x="34" y="42" width="14" height="2" rx="1" fill="rgba(226,226,226,0.5)"/>
+          <rect x="34" y="46" width="8" height="2" rx="1" fill="rgba(226,226,226,0.5)"/>
+          <circle cx="26" cy="26" r="4" fill="rgba(255,255,255,0.04)" stroke="rgba(226,226,226,0.3)" stroke-width="1.5"/>
+          <circle cx="26" cy="26" r="1.5" fill="#e2e2e2"/>
+        </svg>
+        <span class="tc-text" style="font-size:9px;">TAG CAP</span>
+      </div>
+      <div class="icon-label">앱스토어 1024px</div>
+    </div>
+    <div class="icon-col">
+      <div class="app-icon" style="width:70px;height:70px;border-radius:16px;">
+        <svg width="30" height="30" viewBox="0 0 52 52" fill="none">
+          <rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="8" y="8" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+          <rect x="34" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="38" y="8" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+          <rect x="4" y="34" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="8" y="38" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+          <circle cx="26" cy="26" r="1.5" fill="#e2e2e2"/>
+        </svg>
+        <span class="tc-text" style="font-size:7px;">TAG CAP</span>
+      </div>
+      <div class="icon-label">홈화면</div>
+    </div>
+    <div class="icon-col">
+      <div class="app-icon" style="width:48px;height:48px;border-radius:11px;">
+        <svg width="22" height="22" viewBox="0 0 52 52" fill="none">
+          <rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="8" y="8" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+          <rect x="34" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="38" y="8" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+          <rect x="4" y="34" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.85)" stroke-width="2"/>
+          <rect x="8" y="38" width="6" height="6" rx="1.5" fill="#e2e2e2"/>
+        </svg>
+      </div>
+      <div class="icon-label">알림</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 온보딩 -->
+<div class="section">
+  <div class="section-title">온보딩 흐름</div>
+  <div class="screens-row">
+    <div class="phone-col">
+      <div class="phone-label">스플래시</div>
+      <div class="phone"><div class="notch"></div>
+        <div class="splash">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;animation:fadeUp 0.8s ease-out 0.3s both;">
+            <svg width="40" height="40" viewBox="0 0 52 52" fill="none"><rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.8)" stroke-width="2"/><rect x="8" y="8" width="6" height="6" rx="1.5" fill="#e2e2e2"/><rect x="34" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.8)" stroke-width="2"/><rect x="38" y="8" width="6" height="6" rx="1.5" fill="#e2e2e2"/><rect x="4" y="34" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.8)" stroke-width="2"/><rect x="8" y="38" width="6" height="6" rx="1.5" fill="#e2e2e2"/><circle cx="26" cy="26" r="2" fill="#e2e2e2"/></svg>
+            <div class="splash-name">TAG CAP</div>
+          </div>
+          <div class="splash-sub">scan any tag. find the best price.</div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-col">
+      <div class="phone-label">온보딩 1</div>
+      <div class="phone"><div class="notch"></div>
+        <div class="ob-phone">
+          <div class="ob-illust"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;"><div class="price-tag-mini"><div class="pt-label">Special Price</div><div class="pt-price">¥20,000</div></div><div class="qmarks"><div class="qm q1">?</div><div class="qm q2">?</div><div class="qm q3">?</div></div></div></div>
+          <div class="ob-text"><div class="ob-title">이거 진짜<br>저렴한 건가요?</div><div class="ob-sub">해외 매장 가격표만 보고<br>구매하면 손해볼 수 있어요</div></div>
+          <div class="ob-bottom"><div class="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div><div class="ob-btn">다음</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-col">
+      <div class="phone-label">온보딩 2</div>
+      <div class="phone"><div class="notch"></div>
+        <div class="ob-phone">
+          <div class="ob-illust"><div style="display:flex;flex-direction:column;align-items:center;gap:10px;"><div style="width:56px;height:56px;border-radius:50%;background:#1c1c1f;border:1.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 52 52" fill="none"><rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.7)" stroke-width="2.5"/><rect x="8" y="8" width="6" height="6" rx="1" fill="#e2e2e2"/><rect x="34" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.7)" stroke-width="2.5"/><rect x="38" y="8" width="6" height="6" rx="1" fill="#e2e2e2"/><rect x="4" y="34" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(226,226,226,0.7)" stroke-width="2.5"/><rect x="8" y="38" width="6" height="6" rx="1" fill="#e2e2e2"/></svg></div><div style="display:flex;gap:4px;"><div class="ctag active">🇺🇸</div><div class="ctag">🇯🇵</div><div class="ctag active">🇰🇷</div></div></div></div>
+          <div class="ob-text"><div class="ob-title">태그 하나로<br>전세계 가격 비교</div><div class="ob-sub">35개 글로벌 사이트를<br>한 번에 검색해요</div></div>
+          <div class="ob-bottom"><div class="dots"><div class="dot"></div><div class="dot active"></div><div class="dot"></div></div><div class="ob-btn">다음</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="phone-col">
+      <div class="phone-label">온보딩 3</div>
+      <div class="phone"><div class="notch"></div>
+        <div class="ob-phone">
+          <div class="ob-illust"><div style="display:flex;flex-direction:column;align-items:center;gap:7px;"><div style="background:#1c1c1f;border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;width:128px;gap:8px;"><div><div style="font-size:7px;color:rgba(255,255,255,0.28);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:2px;">절약 가능</div><div style="font-size:17px;font-weight:500;color:#fff;letter-spacing:-0.5px;line-height:1;">₩62,000</div></div><div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.09);border-radius:13px;padding:4px 6px;font-size:11px;font-weight:500;color:#e2e2e2;">46%</div></div><div style="display:flex;gap:4px;"><div class="ctag">배송비</div><div class="ctag active">관세</div></div></div></div>
+          <div class="ob-text"><div class="ob-title">배송비 관세까지<br>다 포함된 최저가</div><div class="ob-sub">숨겨진 비용 없이<br>진짜 최저가를 알려드려요</div></div>
+          <div class="ob-bottom"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot active"></div></div><div class="ob-btn">시작하기</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 핵심 흐름 -->
+<div class="section">
+  <div class="section-title">핵심 사용 흐름</div>
+  <div class="screens-row">
+    <!-- 메인 -->
+    <div class="phone-col">
+      <div class="phone-label">메인</div>
+      <div class="phone"><div class="notch"></div>
+        <div class="main-phone">
+          <div style="display:flex;flex-direction:column;align-items:center;"><div class="app-name">Tag Cap</div><div class="tagline">Get <span>Money</span></div><div class="m-sub-text">scan any tag. find the best price.</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:7px;"><div class="coin-area" id="coinArea"></div><button class="scan-btn" id="scanBtn" onclick="triggerEffect()"><svg width="22" height="22" viewBox="0 0 52 52" fill="none"><rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/><rect x="8" y="8" width="6" height="6" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="34" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/><rect x="38" y="8" width="6" height="6" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="4" y="34" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/><rect x="8" y="38" width="6" height="6" rx="1" fill="rgba(255,255,255,0.7)"/><circle cx="26" cy="26" r="2" fill="rgba(255,255,255,0.7)"/></svg><span class="scan-lbl">SCAN TAG</span></button></div>
+          <div class="badge-row"><div class="badge">글로벌 최저가</div><div class="badge">배송비 포함</div><div class="badge">관세 자동계산</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- 스캔 -->
+    <div class="phone-col">
+      <div class="phone-label">스캔</div>
+      <div class="phone scan-phone"><div class="notch"></div>
+        <div class="s-top"><div class="s-icon-btn">✕</div><div class="s-title">Tag Cap</div><div class="s-icon-btn">⚡</div></div>
+        <div class="icon-zone"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="scan-frame"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div><div class="scan-line"></div></div></div>
+        <div class="s-hint">태그에 카메라를 대세요<br><span>자동으로 인식</span>됩니다</div>
+        <div class="s-bottom"><div class="s-side"></div><div class="shutter"><div class="shutter-inner"></div></div><div class="s-side"></div></div>
+      </div>
+    </div>
+    <!-- 로딩 -->
+    <div class="phone-col">
+      <div class="phone-label">로딩</div>
+      <div class="phone loading-phone"><div class="notch"></div>
+        <div class="l-appname">Tag Cap</div>
+        <div class="l-icon-zone"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="l-icon-wrap"><svg width="20" height="20" viewBox="0 0 52 52" fill="none"><rect x="4" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/><rect x="8" y="8" width="6" height="6" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="34" y="4" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/><rect x="38" y="8" width="6" height="6" rx="1" fill="rgba(255,255,255,0.7)"/><rect x="4" y="34" width="14" height="14" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/><rect x="8" y="38" width="6" height="6" rx="1" fill="rgba(255,255,255,0.7)"/><circle cx="26" cy="26" r="2" fill="rgba(255,255,255,0.7)"/></svg></div></div>
+        <div class="l-status"><div class="l-main" id="lMain">전세계 가격 검색 중</div><div class="l-sub" id="lSub">최저가를 찾고 있어요...</div></div>
+        <div class="country-wrap"><div class="country-row"><div class="ctag active">🇺🇸 USA</div><div class="ctag">🇯🇵 JP</div><div class="ctag active">🇬🇧 UK</div><div class="ctag">🇩🇪 DE</div><div class="ctag active">🇰🇷 KR</div><div class="ctag">🇫🇷 FR</div><div class="ctag active">🇺🇸 USA</div><div class="ctag">🇯🇵 JP</div><div class="ctag active">🇬🇧 UK</div><div class="ctag">🇩🇪 DE</div><div class="ctag active">🇰🇷 KR</div><div class="ctag">🇫🇷 FR</div></div></div>
+        <div class="l-bottom"><div class="l-prog-label"><span>검색 중...</span><span class="pct" id="lPct">0%</span></div><div class="l-prog-track"><div class="l-prog-bar" id="lBar"></div></div></div>
+      </div>
+    </div>
+    <!-- 결과 -->
+    <div class="phone-col">
+      <div class="phone-label">결과</div>
+      <div class="phone result-phone"><div class="notch"></div>
+        <div class="r-header"><div class="r-back">← 스캔 결과</div><div class="r-brand">Tommy Hilfiger</div><div class="r-product">Yacht Club<br>Bomber Jacket</div></div>
+        <div class="r-body">
+          <div class="r-save"><div class="r-save-top"><div><div class="r-eye">절약 가능</div><div class="r-num">₩62,000</div><div class="r-ssub">배송비·관세 포함</div></div><div class="r-pill"><div class="r-pill-n">46%</div><div class="r-pill-l">cheaper</div></div></div><div class="r-bar-row"><div class="r-bl">현재 매장</div><div class="r-bt"><div class="r-bf cur"></div></div><div class="r-bv">₩178K</div></div><div class="r-bar-row"><div class="r-bl">글로벌 최저</div><div class="r-bt"><div class="r-bf best"></div></div><div class="r-bv top">₩116K</div></div></div>
+          <div class="r-list"><div class="r-lh">가격 비교</div><div class="r-row"><div class="r-rl"><div class="r-rank k1">1</div><div><div class="r-sn">Naver 해외직구</div><div class="r-sm">배송 5일</div></div></div><div class="r-rr"><div class="r-price top">₩116K</div><button class="r-buy filled">구매</button></div></div><div class="r-row"><div class="r-rl"><div class="r-rank k2">2</div><div><div class="r-sn">Tommy 공식몰</div><div class="r-sm">배송 7일</div></div></div><div class="r-rr"><div class="r-price">₩134K</div><button class="r-buy ghost">구매</button></div></div><div class="r-row"><div class="r-rl"><div class="r-rank k3">3</div><div><div class="r-sn">Farfetch</div><div class="r-sm">배송 10일</div></div></div><div class="r-rr"><div class="r-price">₩151K</div><button class="r-buy ghost">구매</button></div></div></div>
+          <div class="r-share"><div class="r-sbtn">공유</div><div class="r-sbtn primary">다시 스캔</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 마이 섹션 -->
+<div class="section">
+  <div class="section-title">마이 섹션</div>
+  <div class="screens-row">
+    <!-- 절약결산 -->
+    <div class="phone-col">
+      <div class="phone-label">절약 결산</div>
+      <div class="phone wrapped-phone"><div class="notch"></div>
+        <div class="w-hero"><div class="w-label">2025 Tag Cap Wrapped</div><div class="w-amount">₩341,000</div><div class="w-sub">올해 총 절약 금액</div><div class="w-conscience">총 12회 스캔함</div><div class="w-pill"><div class="w-pill-main">상위 3% 절약러예요 🏆</div><div class="w-pill-sub">당신은 진짜 고수예요</div></div></div>
+        <div class="w-body"><div class="w-mcard"><div class="w-ml"><div class="w-me">이번 달 절약</div><div class="w-mn">₩124,000</div><div class="w-ms">지난달보다 ₩32K ↑</div></div><div class="w-badge">3월 🔥</div></div><div class="w-list"><div class="w-lh">아낀 브랜드 TOP 3</div><div class="w-row"><div class="w-rl"><div class="w-rk k1">1</div><div><div class="w-bn">Tommy Hilfiger</div><div class="w-bc">3회 스캔</div></div></div><div class="w-ba">₩62,000</div></div><div class="w-row"><div class="w-rl"><div class="w-rk k2">2</div><div><div class="w-bn">Ralph Lauren</div><div class="w-bc">2회 스캔</div></div></div><div class="w-ba">₩38,000</div></div><div class="w-row"><div class="w-rl"><div class="w-rk k3">3</div><div><div class="w-bn">Nike</div><div class="w-bc">1회 스캔</div></div></div><div class="w-ba">₩24,000</div></div></div><button class="w-share">📤 내 절약 결산 공유하기</button></div>
+      </div>
+    </div>
+    <!-- 히스토리 -->
+    <div class="phone-col">
+      <div class="phone-label">히스토리</div>
+      <div class="phone hist-phone"><div class="notch"></div>
+        <div class="h-header"><div class="h-row"><div class="h-title">스캔 기록</div><div class="h-total">총 12회</div></div><div class="h-search">🔍 브랜드, 제품명 검색</div></div>
+        <div class="h-body"><div class="h-date">오늘</div><div class="h-item"><div class="h-icon">TH</div><div class="h-info"><div class="h-brand">Tommy Hilfiger</div><div class="h-name">Yacht Club Bomber</div><div class="h-meta">일본 → Naver 직구</div></div><div class="h-right"><div class="h-saved">-₩62,000</div><div class="h-time">14:32</div></div></div><div class="h-item"><div class="h-icon">NK</div><div class="h-info"><div class="h-brand">Nike</div><div class="h-name">Air Max 97 Silver</div><div class="h-meta">미국 → 국내 최저</div></div><div class="h-right"><div class="h-saved">-₩24,000</div><div class="h-time">11:15</div></div></div><div class="h-date">어제</div><div class="h-item"><div class="h-icon">RL</div><div class="h-info"><div class="h-brand">Ralph Lauren</div><div class="h-name">Polo Shirt Classic</div><div class="h-meta">영국 → Tommy.com</div></div><div class="h-right"><div class="h-saved">-₩38,000</div><div class="h-time">16:44</div></div></div><div class="h-item"><div class="h-icon">GC</div><div class="h-info"><div class="h-brand">Gucci</div><div class="h-name">GG Canvas Tote</div><div class="h-meta">프랑스 매장</div></div><div class="h-right"><div class="h-saved none">최저가였음</div><div class="h-time">10:02</div></div></div><div class="h-summary"><div class="h-sitem"><div class="h-sval">12회</div><div class="h-slbl">총 스캔</div></div><div class="h-sdiv"></div><div class="h-sitem"><div class="h-sval">₩341K</div><div class="h-slbl">총 절약</div></div><div class="h-sdiv"></div><div class="h-sitem"><div class="h-sval">5개</div><div class="h-slbl">브랜드</div></div></div></div>
+      </div>
+    </div>
+    <!-- 마이페이지 -->
+    <div class="phone-col">
+      <div class="phone-label">마이페이지</div>
+      <div class="phone my-phone"><div class="notch"></div>
+        <div class="my-header"><div class="my-title">마이페이지</div><div class="my-profile"><div class="my-avatar">성</div><div><div class="my-name">성준문님</div><div class="my-curr">🇰🇷 KRW (₩) 기준</div></div><div class="my-edit">편집 ›</div></div></div>
+        <div class="my-body"><div class="my-banner"><div><div class="my-bey">2025 Wrapped</div><div class="my-btitle">내 절약 결산 보기</div><div class="my-bsub">올해 ₩341,000 절약 🏆</div></div><div class="my-barrow">›</div></div><div class="my-sec">설정</div><div class="my-list"><div class="my-row"><div class="my-rl"><div class="my-ricon">💱</div><div><div class="my-rtitle">기준 통화</div></div></div><div style="display:flex;align-items:center;gap:3px;"><div class="my-rval">KRW</div><div class="my-rchev">›</div></div></div><div class="my-row"><div class="my-rl"><div class="my-ricon">🌍</div><div><div class="my-rtitle">언어</div></div></div><div style="display:flex;align-items:center;gap:3px;"><div class="my-rval">한국어</div><div class="my-rchev">›</div></div></div><div class="my-row"><div class="my-rl"><div class="my-ricon">🔔</div><div><div class="my-rtitle">가격 알림</div></div></div><div class="toggle on"></div></div></div><div class="my-sec">지원</div><div class="my-list"><div class="my-row"><div class="my-rl"><div class="my-ricon">💬</div><div><div class="my-rtitle">문의하기</div></div></div><div class="my-rchev">›</div></div><div class="my-row"><div class="my-rl"><div class="my-ricon">⭐</div><div><div class="my-rtitle">앱 평가하기</div></div></div><div class="my-rchev">›</div></div></div><div class="my-appver">Tag Cap v1.0.0 · Made with ❤️</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function triggerEffect() {
+  const btn = document.getElementById('scanBtn');
+  const area = document.getElementById('coinArea');
+  btn.classList.remove('burst');
+  void btn.offsetWidth;
+  btn.classList.add('burst');
+  area.innerHTML = '';
+  [{ size:14,left:2,delay:0,label:'$'},{ size:11,left:18,delay:60,label:'¥'},{ size:13,left:34,delay:100,label:'€'},{ size:10,left:46,delay:20,label:'₩'}].forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'coin';
+    el.style.cssText = `width:${item.size}px;height:${item.size}px;left:${item.left}px;top:4px;`;
+    el.textContent = item.label;
+    area.appendChild(el);
+    setTimeout(() => el.classList.add('animate'), item.delay);
+  });
+}
+const steps = [
+  {pct:35,main:"가격 수집 중",sub:"35개 사이트..."},
+  {pct:68,main:"배송비 계산 중",sub:"국가별 적용 중..."},
+  {pct:89,main:"관세 적용 중",sub:"한국 관세율..."},
+  {pct:97,main:"최저가 발견!",sub:"결과 정리 중..."},
+];
+let timers = [];
+function runSteps() {
+  steps.forEach((s,i) => {
+    const t = setTimeout(() => {
+      document.getElementById('lMain').textContent = s.main;
+      document.getElementById('lSub').textContent  = s.sub;
+      document.getElementById('lPct').textContent  = s.pct + '%';
+    }, (i+1)*750);
+    timers.push(t);
+  });
+}
+runSteps();
+</script>
+</body>
+</html>
